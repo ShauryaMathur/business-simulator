@@ -4,8 +4,14 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/app/providers/ToastProvider';
 
+export interface AdvanceTurnResult {
+    is_win: boolean;
+    cumulative_profit: number;
+    new_cash: number;
+}
+
 interface DecisionPanelProps {
-    onTurnAdvanced: () => void | Promise<void>;
+    onTurnAdvanced: (result?: AdvanceTurnResult) => void | Promise<void>;
     currentHeadcount: number;
 }
 
@@ -41,7 +47,7 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
         }
         setLoading(true);
 
-        const { error } = await supabase.rpc('advance_turn', {
+        const { data, error } = await supabase.rpc('advance_turn', {
             p_unit_price: decisions.unitPrice,
             p_new_engineers: decisions.newEngineers,
             p_new_sales: decisions.newSales,
@@ -56,7 +62,7 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
             });
         } else {
             setDecisions(prev => ({ ...prev, newEngineers: 0, newSales: 0 }));
-            await onTurnAdvanced();
+            await onTurnAdvanced(data as AdvanceTurnResult);
         }
         setLoading(false);
     };

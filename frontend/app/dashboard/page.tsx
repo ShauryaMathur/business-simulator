@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useToast } from '@/app/providers/ToastProvider';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -8,10 +9,12 @@ import OfficeGrid from '@/components/OfficeGrid';
 import GameOverlay from '@/components/GameOverlay';
 import AnalyticsCharts from '@/components/AnalyticsCharts';
 import FinancialHistory from '@/components/FinancialHistory';
+import type { AdvanceTurnResult } from '@/components/DecisionPanel';
 
 export default function Dashboard() {
     const { user, loading: authLoading } = useAuth();
     const { showToast } = useToast();
+    const [latestCumulativeProfit, setLatestCumulativeProfit] = useState<number | null>(null);
     const {
         game,
         history,
@@ -28,6 +31,7 @@ export default function Dashboard() {
     const handleRestart = async () => {
         try {
             await restartSimulation();
+            setLatestCumulativeProfit(null);
         } catch (err) {
             showToast({
                 message:
@@ -38,6 +42,13 @@ export default function Dashboard() {
                 durationMs: 4500,
             });
         }
+    };
+
+    const handleTurnAdvanced = async (result?: AdvanceTurnResult) => {
+        if (result?.is_win) {
+            setLatestCumulativeProfit(result.cumulative_profit);
+        }
+        await refetch();
     };
 
     if (authLoading || (loading && !game)) return <p className="p-8">Loading Startup...</p>;
@@ -70,10 +81,11 @@ export default function Dashboard() {
                 <GameOverlay
                     cash={game.cash}
                     quarter={game.current_quarter}
+                    cumulativeProfit={latestCumulativeProfit}
                     onRestart={handleRestart}
                     restarting={loading || restarting}
                 />
-                <DecisionPanel onTurnAdvanced={refetch} currentHeadcount = {game.engineers + game.sales_staff}/>
+                <DecisionPanel onTurnAdvanced={handleTurnAdvanced} currentHeadcount = {game.engineers + game.sales_staff}/>
 
                 <FinancialHistory history={history} />
                 <div className="grid grid-cols-1 gap-8">

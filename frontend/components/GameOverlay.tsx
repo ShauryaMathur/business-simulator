@@ -5,11 +5,18 @@ import { formatQuarterLabel } from '@/lib/formatters';
 interface GameOverlayProps {
   cash: number;
   quarter: number;
+  cumulativeProfit?: number | null;
   onRestart: () => void;
   restarting?: boolean;
 }
 
-export default function GameOverlay({ cash, quarter, onRestart, restarting = false }: GameOverlayProps) {
+export default function GameOverlay({
+  cash,
+  quarter,
+  cumulativeProfit,
+  onRestart,
+  restarting = false,
+}: GameOverlayProps) {
   const isBankrupt = cash <= 0; 
   const isWinner = quarter > 40 && cash > 0; 
 
@@ -34,6 +41,11 @@ export default function GameOverlay({ cash, quarter, onRestart, restarting = fal
             <p className="text-2xl font-mono font-bold text-black mb-6">
               Final Cash: ${cash.toLocaleString()}
             </p>
+            {typeof cumulativeProfit === 'number' ? (
+              <p className="text-lg font-mono font-semibold text-gray-800 mb-6">
+                Cumulative Profit: ${cumulativeProfit.toLocaleString()}
+              </p>
+            ) : null}
           </>
         )}
 
