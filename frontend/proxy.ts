@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/auth-helpers-nextjs";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isDashboardRoute = pathname.startsWith("/dashboard");
