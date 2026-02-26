@@ -14,7 +14,7 @@ The app is a vertical slice of the game loop: quarterly decisions -> server-side
 - Email/password authentication (Supabase Auth)
 - Session persistence across reloads
 - Route protection + redirects (`/dashboard` protected; `/login` + `/signup` redirect when authenticated)
-- New user bootstrap (trigger inserts initial game row)
+- New user bootstrap (trigger inserts initial game row) - Signup as a new user to setup the game.
 - Quarterly decision panel:
   - Unit price
   - New engineers
@@ -113,3 +113,8 @@ Operational Migrations: Supabase schema changes in SQL files do not retroactivel
 ## Assignment Context
 
 This project is an implementation of **Option A (Simulation Spec)** from the take-home assignment.
+
+## Live Demo
+This project is deployed on Vercel and DB/backend is setup on Supabase for demo.
+
+Link - https://business-simulator-navy.vercel.app/dashboard
