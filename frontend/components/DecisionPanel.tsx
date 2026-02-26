@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { OFFICE_MAX_CAPACITY } from '@/config/game';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/app/providers/ToastProvider';
 
@@ -28,7 +29,7 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
 
     const handleAdvanceTurn = async () => {
         const newHires = decisions.newEngineers + decisions.newSales;
-        const totalCapacity = 24;
+        const totalCapacity = OFFICE_MAX_CAPACITY;
 
         if (currentHeadcount + newHires > totalCapacity) {
             showToast({
@@ -51,7 +52,8 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
             p_unit_price: decisions.unitPrice,
             p_new_engineers: decisions.newEngineers,
             p_new_sales: decisions.newSales,
-            p_salary_pct: decisions.salaryPct
+            p_salary_pct: decisions.salaryPct,
+            p_max_capacity: totalCapacity,
         });
 
         if (error) {

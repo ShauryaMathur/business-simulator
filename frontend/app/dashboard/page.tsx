@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useToast } from '@/app/providers/ToastProvider';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { OFFICE_MAX_CAPACITY } from '@/config/game';
 import { formatQuarterLabel } from '@/lib/formatters';
 import DecisionPanel from '@/components/DecisionPanel';
 import OfficeGrid from '@/components/OfficeGrid';
@@ -93,7 +94,7 @@ export default function Dashboard() {
                     <OfficeGrid
                         engineers={game.engineers}
                         sales={game.sales_staff}
-                        totalCapacity={24} 
+                        totalCapacity={OFFICE_MAX_CAPACITY} 
                     />
                 </div>
                 <AnalyticsCharts history={history} engineers={game.engineers} sales={game.sales_staff} />

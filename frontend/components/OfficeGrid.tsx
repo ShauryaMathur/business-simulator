@@ -1,12 +1,14 @@
 'use client';
 
+import { OFFICE_MAX_CAPACITY } from '@/config/game';
+
 interface OfficeGridProps {
   engineers: number;
   sales: number;
   totalCapacity?: number;
 }
 
-export default function OfficeGrid({ engineers, sales, totalCapacity = 24 }: OfficeGridProps) {
+export default function OfficeGrid({ engineers, sales, totalCapacity = OFFICE_MAX_CAPACITY }: OfficeGridProps) {
   const totalEmployees = engineers + sales;
 
   return (

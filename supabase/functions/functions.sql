@@ -25,7 +25,8 @@ CREATE OR REPLACE FUNCTION public.advance_turn(
   p_unit_price numeric,
   p_new_engineers integer,
   p_new_sales integer,
-  p_salary_pct numeric
+  p_salary_pct numeric,
+  p_max_capacity integer DEFAULT 24
 ) RETURNS jsonb AS $$ 
 DECLARE
   v_user_id UUID := auth.uid();
@@ -63,8 +64,12 @@ BEGIN
     RAISE EXCEPTION 'Salary percentage must be greater than zero.';
   END IF;
 
-  IF (v_game.engineers + v_game.sales_staff + p_new_engineers + p_new_sales) > 24 THEN
-    RAISE EXCEPTION 'Office capacity exceeded. Max 24 desks available.';
+  IF p_max_capacity IS NULL OR p_max_capacity <= 0 THEN
+    RAISE EXCEPTION 'Max capacity must be greater than zero.';
+  END IF;
+
+  IF (v_game.engineers + v_game.sales_staff + p_new_engineers + p_new_sales) > p_max_capacity THEN
+    RAISE EXCEPTION 'Office capacity exceeded. Max % desks available.', p_max_capacity;
   END IF;
 
   IF v_game.cash <= 0 THEN

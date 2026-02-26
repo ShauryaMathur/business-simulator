@@ -106,6 +106,8 @@ Testing Coverage: Automated tests (unit/integration/e2e) were deferred in favor 
 
 Win-State Persistence: `cumulative_profit` in the victory modal is derived from the `advance_turn` turn-result payload. If the page is reloaded on the win state, that derived metric is not currently re-calculated from history and rehydrated into the modal.
 
+Fixed Office Capacity (UI Simplicity): To constrain UI overflow/layout complexity and keep the office visualization predictable for this vertical slice, the maximum office capacity is intentionally fixed and centralized in `frontend/config/game.ts` (`OFFICE_MAX_CAPACITY`). The same value is passed into the `advance_turn` RPC to keep frontend and backend validation aligned.
+
 Operational Migrations: Supabase schema changes in SQL files do not retroactively update an already-created database; schema changes (e.g., column type updates) must be applied through migrations/SQL execution in the target environment.
 
 ## Assignment Context
