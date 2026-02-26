@@ -88,6 +88,7 @@ export default function Dashboard() {
                 <DecisionPanel onTurnAdvanced={handleTurnAdvanced} currentHeadcount = {game.engineers + game.sales_staff}/>
 
                 <FinancialHistory history={history} />
+                
                 <div className="grid grid-cols-1 gap-8">
                     <OfficeGrid
                         engineers={game.engineers}

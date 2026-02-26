@@ -49,6 +49,9 @@ export default function OfficeGrid({ engineers, sales, totalCapacity = 24 }: Off
       <p className="mt-4 text-sm text-gray-500 italic">
         Occupancy: {totalEmployees} / {totalCapacity} desks filled.
       </p>
+      <p className="mt-4 text-sm text-gray-500 italic">
+        Engineers: {engineers} / Sales Staff: {sales}
+      </p>
     </section>
   );
 }
