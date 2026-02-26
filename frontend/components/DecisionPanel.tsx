@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/app/providers/ToastProvider';
 
 interface DecisionPanelProps {
-    onTurnAdvanced: () => void;
+    onTurnAdvanced: () => void | Promise<void>;
     currentHeadcount: number;
 }
 
 export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: DecisionPanelProps) {
     const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
 
     const [decisions, setDecisions] = useState({
         unitPrice: 100,
@@ -23,12 +25,18 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
         const totalCapacity = 24;
 
         if (currentHeadcount + newHires > totalCapacity) {
-            alert(`You only have ${totalCapacity - currentHeadcount} desks available!`);
+            showToast({
+                message: `You only have ${totalCapacity - currentHeadcount} desks available!`,
+                variant: 'error',
+            });
             return;
         }
 
         if (decisions.unitPrice <= 0 || decisions.newEngineers < 0 || decisions.newSales < 0) {
-            alert("Please enter valid positive numbers.");
+            showToast({
+                message: 'Please enter valid positive numbers.',
+                variant: 'error',
+            });
             return;
         }
         setLoading(true);
@@ -41,10 +49,14 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
         });
 
         if (error) {
-            alert(`Error advancing turn: ${error.message}`);
+            showToast({
+                message: `Error advancing turn: ${error.message}`,
+                variant: 'error',
+                durationMs: 4500,
+            });
         } else {
             setDecisions(prev => ({ ...prev, newEngineers: 0, newSales: 0 }));
-            onTurnAdvanced();
+            await onTurnAdvanced();
         }
         setLoading(false);
     };

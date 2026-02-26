@@ -2,21 +2,46 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const emailValidationError =
+    emailTouched && email && !emailPattern.test(email)
+      ? "Enter a valid email address."
+      : null;
+  const passwordValidationError =
+    passwordTouched && !password ? "Password is required." : null;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setEmailTouched(true);
+    setPasswordTouched(true);
     setError(null);
     setSuccess(null);
+
+    if (!emailPattern.test(email)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required.");
+      return;
+    }
+
     setIsLoading(true);
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -32,7 +57,12 @@ export default function LoginPage() {
     }
 
     setSuccess("Logged in successfully.");
-    router.push("/dashboard");
+    const redirectTo = searchParams.get("redirectTo");
+    const safeRedirect =
+      redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+        ? redirectTo
+        : "/dashboard";
+    router.push(safeRedirect);
   };
 
   return (
@@ -58,11 +88,19 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              onBlur={() => setEmailTouched(true)}
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-900"
+              aria-invalid={Boolean(emailValidationError)}
+              aria-describedby={emailValidationError ? "login-email-error" : undefined}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
               placeholder="you@example.com"
             />
+            {emailValidationError ? (
+              <p id="login-email-error" className="mt-1 text-sm text-red-600" aria-live="polite">
+                {emailValidationError}
+              </p>
+            ) : null}
           </div>
 
           <div>
@@ -77,25 +115,41 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              onBlur={() => setPasswordTouched(true)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-900"
+              aria-invalid={Boolean(passwordValidationError)}
+              aria-describedby={passwordValidationError ? "login-password-error" : undefined}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
               placeholder="Enter your password"
             />
+            {passwordValidationError ? (
+              <p
+                id="login-password-error"
+                className="mt-1 text-sm text-red-600"
+                aria-live="polite"
+              >
+                {passwordValidationError}
+              </p>
+            ) : null}
           </div>
 
           {error ? (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-red-600" role="alert" aria-live="polite">
               {error}
             </p>
           ) : null}
 
-          {success ? <p className="text-sm text-green-600">{success}</p> : null}
+          {success ? (
+            <p className="text-sm text-green-600" aria-live="polite">
+              {success}
+            </p>
+          ) : null}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </button>
@@ -103,7 +157,10 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-zinc-600">
           New here?{" "}
-          <Link href="/signup" className="font-medium text-zinc-900 underline">
+          <Link
+            href="/signup"
+            className="font-medium text-zinc-900 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+          >
             Create an account
           </Link>
         </p>

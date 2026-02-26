@@ -1,12 +1,15 @@
 'use client';
 
+import { formatQuarterLabel } from '@/lib/formatters';
+
 interface GameOverlayProps {
   cash: number;
   quarter: number;
   onRestart: () => void;
+  restarting?: boolean;
 }
 
-export default function GameOverlay({ cash, quarter, onRestart }: GameOverlayProps) {
+export default function GameOverlay({ cash, quarter, onRestart, restarting = false }: GameOverlayProps) {
   const isBankrupt = cash <= 0; 
   const isWinner = quarter > 40 && cash > 0; 
 
@@ -19,7 +22,7 @@ export default function GameOverlay({ cash, quarter, onRestart }: GameOverlayPro
           <>
             <h2 className="text-4xl font-bold text-red-600 mb-4">Bankrupt!</h2>
             <p className="text-gray-600 mb-6">
-              Your cash reached zero in Quarter {quarter}. The startup has folded. 
+              Your cash reached zero in {formatQuarterLabel(quarter)}. The startup has folded.
             </p>
           </>
         ) : (
@@ -36,9 +39,10 @@ export default function GameOverlay({ cash, quarter, onRestart }: GameOverlayPro
 
         <button
           onClick={onRestart}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
+          disabled={restarting}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Restart Simulation
+          {restarting ? 'Restarting...' : 'Restart Simulation'}
         </button>
       </div>
     </div>

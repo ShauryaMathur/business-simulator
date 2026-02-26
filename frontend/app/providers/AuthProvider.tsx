@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
+  refreshUser: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -14,6 +16,20 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const refreshUser = async () => {
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+
+    setUser(currentUser ?? null);
+    setLoading(false);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -45,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser, signOut }}>
       {children}
     </AuthContext.Provider>
   );
