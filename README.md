@@ -1,12 +1,12 @@
 # Business Simulator (Full-Stack Engineer Take-Home)
 
-Single-player, turn-based startup simulation built with Next.js + Supabase for the Convergent Full-Stack Engineer take-home assignment.
+Single-player, turn-based startup simulation built with Next.js + Supabase for the take-home assignment for Convergent's Full-Stack Engineer role.
 
 The app is a vertical slice of the game loop: quarterly decisions -> server-side simulation via Supabase RPC -> persisted state -> dashboard/office visualization/history updates.
 
 ## Tech Stack
 
-- Frontend: Next.js (App Router), React, TypeScript, Tailwind CSS, Recharts
+- Frontend: Next.js, React, TypeScript, Tailwind CSS, Recharts
 - Backend / DB: Supabase (Postgres, Auth, RPC functions)
 
 ## What Was Built
@@ -65,7 +65,7 @@ Notes:
 
 ## Simulation Model Notes
 
-The simulation runs server-side in `advance_turn` and persists results to `games` and `game_history`.
+The simulation runs server-side in `advance_turn` and persists results to `games` and `game_history` tables.
 
 Financial Integrity:
 - History snapshots reflect Closing Balances. Cash shown for Quarter `N` includes the revenue and expenses incurred during that quarter, ensuring the "Financial History" table reconciles with the current "Cash at Hand".
@@ -76,7 +76,7 @@ Financial Integrity:
 
 Simulation Engine (RPC): All business logic for the startup simulation is encapsulated within PostgreSQL RPC functions (`advance_turn`, `reset_game`). This ensures the client cannot manipulate outcomes (e.g., granting extra cash) and keeps the simulation model protected on the server.
 
-Zero-Trust Security (RLS): Implemented Row Level Security (RLS) on `public.games` and `public.game_history`, scoped to `auth.uid()`. This ensures that even with the public API key, users are restricted to their own data and helps mitigate IDOR-style access risks.
+Zero-Trust Security (RLS): Implemented Row Level Security (RLS) on `public.games` and `public.game_history`, scoped to `auth.uid()`. This ensures that even with the public API key, users are restricted to their own data.
 
 Edge-Level Route Protection: Utilized Next.js `proxy.ts` route interception to guard `/dashboard` and redirect authenticated users away from `/login` and `/signup`. This prevents unauthorized dashboard access before render and avoids auth-related layout flash.
 
@@ -84,11 +84,11 @@ Edge-Level Route Protection: Utilized Next.js `proxy.ts` route interception to g
 
 Audit-Ready History (Soft Delete): Rather than destructive `DELETE` operations on reset, I implemented a soft delete strategy using `game_history.is_deleted`. This preserves prior game attempts for auditability/debugging and future analytics while keeping the active UI session clean.
 
-Atomic State Transitions: Turn advancement is implemented as a single RPC that performs simulation math, history logging, and game state updates together. This leverages database transaction semantics so failures roll back the entire operation and prevent a partially advanced/corrupted game state.
+Atomic State Transitions: Turn advancement is implemented as a single RPC that performs simulation math, history logging, and game state updates together. We use database transaction semantics so failures roll back the entire operation and prevent a partially advanced/corrupted game state.
 
 ### 3. Frontend Architecture
 
-Pragmatic State Management: Used React Context (`AuthProvider`) over Redux. The global state surface is intentionally small (auth/session only), so Context is a lower-overhead solution that remains easy to reason about without Redux boilerplate. Redux would be overkill for this scope.
+Pragmatic State Management: Used React Context (`AuthProvider`) over Redux. The global state surface is intentionally small (auth/session only), so Context is a lower-overhead solution that remains easy to reason about without the huge Redux boilerplate. Redux would be overkill for this scope.
 
 Decoupled Data Fetching: Encapsulated dashboard orchestration in a custom `useDashboardData` hook. This separates the data-access layer (Supabase queries/RPC orchestration) from presentation components, improving maintainability and making future testing/refactoring easier.
 
