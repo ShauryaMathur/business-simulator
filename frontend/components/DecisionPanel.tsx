@@ -39,34 +39,62 @@ export default function DecisionPanel({ onTurnAdvanced, currentHeadcount }: Deci
             return;
         }
 
-        if (decisions.unitPrice <= 0 || decisions.newEngineers < 0 || decisions.newSales < 0) {
+        const hasInvalidNumbers =
+            !Number.isFinite(decisions.unitPrice) ||
+            !Number.isFinite(decisions.salaryPct) ||
+            !Number.isFinite(decisions.newEngineers) ||
+            !Number.isFinite(decisions.newSales);
+
+        const hasInvalidRanges =
+            decisions.unitPrice <= 0 ||
+            decisions.salaryPct <= 0 ||
+            decisions.newEngineers < 0 ||
+            decisions.newSales < 0 ||
+            !Number.isInteger(decisions.newEngineers) ||
+            !Number.isInteger(decisions.newSales);
+
+        if (hasInvalidNumbers || hasInvalidRanges) {
             showToast({
-                message: 'Please enter valid positive numbers.',
+                message: 'Please enter valid positive numbers (whole numbers for hires).',
                 variant: 'error',
             });
             return;
         }
+
         setLoading(true);
 
-        const { data, error } = await supabase.rpc('advance_turn', {
-            p_unit_price: decisions.unitPrice,
-            p_new_engineers: decisions.newEngineers,
-            p_new_sales: decisions.newSales,
-            p_salary_pct: decisions.salaryPct,
-            p_max_capacity: totalCapacity,
-        });
+        try {
+            const { data, error } = await supabase.rpc('advance_turn', {
+                p_unit_price: decisions.unitPrice,
+                p_new_engineers: decisions.newEngineers,
+                p_new_sales: decisions.newSales,
+                p_salary_pct: decisions.salaryPct,
+                p_max_capacity: totalCapacity,
+            });
 
-        if (error) {
+            if (error) {
+                showToast({
+                    message: `Error advancing turn: ${error.message}`,
+                    variant: 'error',
+                    durationMs: 4500,
+                });
+                return;
+            }
+
+            setDecisions(prev => ({ ...prev, newEngineers: 0, newSales: 0 }));
+            await onTurnAdvanced(data as AdvanceTurnResult);
+        } catch (err) {
             showToast({
-                message: `Error advancing turn: ${error.message}`,
+                message:
+                    err instanceof Error
+                        ? `Error advancing turn: ${err.message}`
+                        : 'Error advancing turn.',
                 variant: 'error',
                 durationMs: 4500,
             });
-        } else {
-            setDecisions(prev => ({ ...prev, newEngineers: 0, newSales: 0 }));
-            await onTurnAdvanced(data as AdvanceTurnResult);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (

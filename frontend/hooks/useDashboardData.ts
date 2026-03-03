@@ -24,7 +24,7 @@ async function fetchDashboardData(userId: string) {
     .from('games')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (gameError) {
     throw gameError;
