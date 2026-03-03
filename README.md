@@ -117,4 +117,4 @@ This project is an implementation of **Option A (Simulation Spec)** from the tak
 ## Live Demo
 This project is deployed on Vercel and DB/backend is setup on Supabase for demo.
 
-Link - [https://business-simulator-navy.vercel.app/dashboard](https://business-simulator-navy.vercel.app/)
+Link - [https://business-simulator-navy.vercel.app/](https://business-simulator-navy.vercel.app/)
